@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Gerar Página do Casal</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; background: #fff0f5; padding: 20px; }
     input, textarea { margin: 10px 0; padding: 8px; width: 300px; }
     button { padding: 10px 20px; background-color: #ff69b4; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    #qrcode { margin-top: 20px; }
-    #download-qrcode { margin-top: 10px; display: none; }
   </style>
 </head>
 <body>
@@ -23,14 +20,8 @@
     <button type="submit">Gerar Página</button>
   </form>
 
-  <div id="qrcode"></div>
-  <button id="download-qrcode">Baixar QR Code</button>
-
   <script>
-    const qrcodeDiv = document.getElementById('qrcode');
-    const downloadBtn = document.getElementById('download-qrcode');
-
-    document.getElementById('form').addEventListener('submit', function(e) {
+    document.getElementById('form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const nomes = document.getElementById('nomes').value;
@@ -44,51 +35,27 @@
       }
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = async function(event) {
         const imagemData = event.target.result;
 
-        const params = new URLSearchParams({
-          nomes,
-          data,
-          mensagem,
-          imagem: imagemData
-        });
+        try {
+          const response = await fetch('http://localhost:3000/api/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nomes, data, mensagem, imagem: imagemData })
+          });
 
-        const url = 'site.html?' + params.toString();
+          if (!response.ok) throw new Error('Erro ao salvar dados');
 
-        // Abrir nova aba com página personalizada
-        window.open(url, '_blank');
+          const { url } = await response.json();
+          window.open(`http://localhost:3000${url}`, '_blank');
 
-        // Limpar QR Code antigo
-        qrcodeDiv.innerHTML = '';
-        downloadBtn.style.display = 'none';
-
-        // Gerar QR Code no canvas dentro da div
-        QRCode.toCanvas(qrcodeDiv, url, function(error) {
-          if (error) {
-            console.error(error);
-            return;
-          }
-          // Mostrar botão para download
-          downloadBtn.style.display = 'inline-block';
-        });
+        } catch (error) {
+          alert('Erro: ' + error.message);
+        }
       };
 
       reader.readAsDataURL(foto);
-    });
-
-    // Função para baixar o QR Code do canvas como imagem PNG
-    downloadBtn.addEventListener('click', () => {
-      const canvas = qrcodeDiv.querySelector('canvas');
-      if (!canvas) {
-        alert('QR Code não foi gerado ainda.');
-        return;
-      }
-
-      const link = document.createElement('a');
-      link.download = 'qrcode_pagina_casal.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
     });
   </script>
 </body>
