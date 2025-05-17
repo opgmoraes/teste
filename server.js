@@ -1,8 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = 3000;
 
-app.use(express.json({ limit: '10mb' }));
+app.use(cors()); // Habilita CORS para todas as origens
+app.use(express.json({ limit: '10mb' })); // Permite json grande (imagens base64)
 
 const store = {};
 
