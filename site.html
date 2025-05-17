@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Página do Casal</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #fffafc; padding: 20px; }
+    img { max-width: 100%; border-radius: 10px; margin-top: 20px; }
+    .card { background: white; padding: 20px; border-radius: 15px; max-width: 600px; margin: 20px auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="titulo"></h2>
+    <p id="contador"></p>
+    <img id="imagemPreview" alt="Foto do casal" />
+    <p id="msg"></p>
+  </div>
+
+  <script>
+    function calcularDias(data) {
+      const hoje = new Date();
+      const inicio = new Date(data);
+      const diff = hoje - inicio;
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const nomes = params.get("nomes");
+      const data = params.get("data");
+      const mensagem = params.get("mensagem");
+      const imagem = params.get("imagem");
+
+      if (!nomes || !data || !mensagem || !imagem) {
+        document.body.innerHTML = '<p>Dados insuficientes para mostrar a página.</p>';
+        return;
+      }
+
+      document.getElementById("titulo").innerText = `💖 ${nomes} 💖`;
+      document.getElementById("contador").innerText = `Estão juntos há ${calcularDias(data)} dias!`;
+      document.getElementById("msg").innerText = mensagem;
+      document.getElementById("imagemPreview").src = imagem;
+    };
+  </script>
+</body>
+</html>

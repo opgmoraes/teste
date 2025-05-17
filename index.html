@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerar Página do Casal</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #fff0f5; padding: 20px; }
+    input, textarea { margin: 10px 0; padding: 8px; width: 300px; }
+    button { padding: 10px 20px; background-color: #ff69b4; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #qrcode { margin-top: 20px; }
+    #download-qrcode { margin-top: 10px; display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>💖 Crie sua Página do Casal 💖</h1>
+  <form id="form">
+    <input type="text" id="nomes" placeholder="Nome do casal" required /><br />
+    <input type="date" id="data" required /><br />
+    <textarea id="mensagem" placeholder="Mensagem" required></textarea><br />
+    <input type="file" id="foto" accept="image/*" required /><br />
+    <button type="submit">Gerar Página</button>
+  </form>
+
+  <div id="qrcode"></div>
+  <button id="download-qrcode">Baixar QR Code</button>
+
+  <script>
+    const qrcodeDiv = document.getElementById('qrcode');
+    const downloadBtn = document.getElementById('download-qrcode');
+
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nomes = document.getElementById('nomes').value;
+      const data = document.getElementById('data').value;
+      const mensagem = document.getElementById('mensagem').value;
+      const foto = document.getElementById('foto').files[0];
+
+      if (!foto) {
+        alert('Por favor, selecione uma foto.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const imagemData = event.target.result;
+
+        const params = new URLSearchParams({
+          nomes,
+          data,
+          mensagem,
+          imagem: imagemData
+        });
+
+        const url = 'site.html?' + params.toString();
+
+        // Abrir nova aba com página personalizada
+        window.open(url, '_blank');
+
+        // Limpar QR Code antigo
+        qrcodeDiv.innerHTML = '';
+        downloadBtn.style.display = 'none';
+
+        // Gerar QR Code no canvas dentro da div
+        QRCode.toCanvas(qrcodeDiv, url, function(error) {
+          if (error) {
+            console.error(error);
+            return;
+          }
+          // Mostrar botão para download
+          downloadBtn.style.display = 'inline-block';
+        });
+      };
+
+      reader.readAsDataURL(foto);
+    });
+
+    // Função para baixar o QR Code do canvas como imagem PNG
+    downloadBtn.addEventListener('click', () => {
+      const canvas = qrcodeDiv.querySelector('canvas');
+      if (!canvas) {
+        alert('QR Code não foi gerado ainda.');
+        return;
+      }
+
+      const link = document.createElement('a');
+      link.download = 'qrcode_pagina_casal.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
